@@ -1,0 +1,46 @@
+name: publish-release-assets
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build release archive
+        shell: powershell
+        run: |
+          $releaseVersion = "${{ github.event.release.tag_name }}".TrimStart("v")
+          .\build.ps1 -Version $releaseVersion
+      - name: Build source archive
+        shell: powershell
+        run: |
+          $releaseVersion = "${{ github.event.release.tag_name }}".TrimStart("v")
+          $sourceFiles = @(
+            ".github",
+            ".gitignore",
+            "CHANGELOG.md",
+            "LICENSE",
+            "README.md",
+            "build.ps1",
+            "src",
+            "tests"
+          )
+          Compress-Archive -LiteralPath $sourceFiles -DestinationPath ("dist\\typora-multi-window-launcher-source-v" + $releaseVersion + ".zip") -Force
+      - name: Attach assets to release
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          $releaseVersion = $env:RELEASE_TAG.TrimStart("v")
+          gh release upload $env:RELEASE_TAG `
+            ("dist\\TyporaMultiWindowLauncher-v" + $releaseVersion + ".zip") `
+            ("dist\\typora-multi-window-launcher-source-v" + $releaseVersion + ".zip") `
+            --clobber
+
