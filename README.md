@@ -81,4 +81,3 @@ This Windows utility registers itself as an optional `.md` handler and launches 
 ## License
 
 MIT. See [LICENSE](LICENSE).
-

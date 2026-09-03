@@ -1,0 +1,20 @@
+name: build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build release archive
+        shell: powershell
+        run: .\build.ps1
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TyporaMultiWindowLauncher
+          path: dist/*.zip
